@@ -1,6 +1,6 @@
 This engine can prove a conclusion, given premises, using some core rules of logic. Almost all of the time, it is able to solve any such problem that I'm able to solve. It's far quicker than me, but sometimes its methods of proving can be inefficient. For example, it can be too eager to try proofs by contradiction. E.g., in order to prove P, assume !P. Then prove P, showing !P leads to a contradiction. Therefore, P. However, this is usually only done when the engine is a bit stuck.
 
-To run the program, go into the bin/Debug/ directory, and run the exe (it is already compiled).
+To run the program, go into the bin/Debug/ directory, and run the exe (it is already compiled). I didn't get around to putting in a clean stopping mechanism for when the user wants to quit the program, so just close the exe when you're done.
 
 The following symbols represent negation, conjunction, disjunction, implication, and biconditional respectively:  !, ^, v, >, =
 Note that the v is the letter v.
