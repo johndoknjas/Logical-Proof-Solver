@@ -7,8 +7,6 @@
        !Pv!Q and !(!Pv!Q). This works, but there's sometimes quicker ways. E.g., P and !P already
        known, but program then derives !Pv!Q to show contradiction.
             - Refer to page in notebook with big star.
-
-
    Ideas:
 
     1) Shuffle the statements vector in the attempt_proof() function sometimes. Could help
@@ -25,7 +23,6 @@
 
     4) When getting a new statement, always make sure you call the remove_outside_brackets function
        on it.
-
 */
 
 #include <iostream>
