@@ -20,7 +20,6 @@
        supposition_success const string vars. Do this specific recording at the very end of all
        other recordings for the supposition.
     3) Make sure all messages are stored in the steps_of_proof global vector.
-
     4) When getting a new statement, always make sure you call the remove_outside_brackets function
        on it.
 */
