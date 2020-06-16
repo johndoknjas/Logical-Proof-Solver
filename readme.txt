@@ -23,8 +23,6 @@ Enter statement #2: -1
 
 The engine will show P <--> P, using no prior premises.
 
-When running the program, a number of test problems will be quickly completed, before the user can enter input.
-
 Brackets can be used in the input for compound statements. E.g.:   !(PvQ)  is a negation of the disjunction between P and Q.
 Extra pairs of brackets are fine too. The following is a valid input:   (((!(PvQ))))
 
