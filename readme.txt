@@ -24,7 +24,7 @@ Enter statement #2: -1
 The engine will show P <--> P, using no prior premises.
 
 Brackets can be used in the input for compound statements. E.g.:   !(PvQ)  is a negation of the disjunction between P and Q.
-Extra pairs of brackets are fine too. The following is a valid input:   (((!(PvQ))))
+Extra pairs of brackets are fine too. The following is a valid input:   ((((((!(PvQ)))))))
 
 The engine can also be used to prove if something leads to a contradiction. This is done by typing the string "contradiction" as the final statement. E.g.:
 
