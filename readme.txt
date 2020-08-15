@@ -37,3 +37,5 @@ Enter statement #5: -1
 In this example, the engine would show Q follows, but then there is a contradiction with Q and !Q.
 
 It's also possible to type the "contradiction" string as a premise, but then the conclusion will follow no matter what.
+
+If you can find solvable problems in propositional logic that the engine gets stuck on, feel free to let me know!
