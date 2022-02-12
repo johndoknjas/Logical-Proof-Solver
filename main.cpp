@@ -110,6 +110,10 @@ bool is_statement_legal(const string& statement) {
     int num_open_brackets = 0;
     int num_closed_brackets = 0;
 
+    // TODO - Use a stack data structure here, to keep track of the number of
+    // unclosed open brackets. This is a stronger way of doing things than just using
+    // 1 bool variable, which is currently what's being done.
+
     for (char c: statement) {
         if (c == '(') {
             ++num_open_brackets;
