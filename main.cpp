@@ -31,6 +31,7 @@
 #include <time.h>
 #include <cstdlib>
 #include <algorithm>
+#include <assert.h>
 
 using namespace std;
 
@@ -38,23 +39,17 @@ const string supposition_failed = "Failed supposition";
 const string supposition_success = "Successful supposition";
 const string contradiction_string = "contradiction";
 
-void remove_any_spaces(string& statement)
-{
+void remove_any_spaces(string& statement) {
     string new_statement;
-
-    for (char c: statement)
-    {
-        if (c != ' ')
-        {
+    for (char c: statement) {
+        if (c != ' ') {
             new_statement += c;
         }
     }
-
     statement = new_statement;
 }
 
-void get_user_inputs(vector<string>& premises, string& conclusion)
-{
+void get_user_inputs(vector<string>& premises, string& conclusion) {
     cout << "Once you've entered some statement(s), enter \"done\" for the last statement you've entered to be the";
     cout << " conclusion that gets proven.\n";
     cout << "Or, if you'd like to quit the program, enter \"done\" right now, for statement #1.\n";
@@ -77,230 +72,139 @@ void get_user_inputs(vector<string>& premises, string& conclusion)
     }
 }
 
+bool is_a_main_operator(char c) {
+    return c == 'v' || c == '^' || c == '!' || c == '>' || c == '=';
+}
+
 // Function returns -1 if there is no main operator.
 int get_main_operator_index(const string& statement, bool look_for_certain_operator,
                             char certain_operator_to_look_for, bool exclude_certain_operator,
-                            char certain_operator_to_exclude)
-{
-    if (!look_for_certain_operator && !exclude_certain_operator)
-    {
+                            char certain_operator_to_exclude) {
+    if (!look_for_certain_operator && !exclude_certain_operator) {
         int main_operator_index_without_negation = get_main_operator_index(statement, false, ' ', true, '!');
-
-        if (main_operator_index_without_negation != -1)
-        {
+        if (main_operator_index_without_negation != -1) {
             return main_operator_index_without_negation;
         }
     }
 
     int left_bracket_counter = 0;
     int right_bracket_counter = 0;
-
-    for (int i = 0; i < statement.size(); i++)
-    {
+    for (int i = 0; i < statement.size(); ++i) {
         char c = statement[i];
-
-        if (c == '(')
-        {
-            left_bracket_counter ++;
-        }
-
-        if (c == ')')
-        {
-            right_bracket_counter ++;
-        }
-
-        if (left_bracket_counter == right_bracket_counter)
-        {
-            if (c == 'v' || c == '^' || c == '!' || c == '>' || c == '=')
-            {
-                if ((!look_for_certain_operator || c == certain_operator_to_look_for) &&
-                    (!exclude_certain_operator || c != certain_operator_to_exclude))
-                {
-                    return i;
-                }
-            }
+        if (c == '(') {
+            ++left_bracket_counter;
+        } else if (c == ')') {
+            ++right_bracket_counter;
+        } else if (left_bracket_counter == right_bracket_counter &&
+                   is_a_main_operator(c) &&
+                   (!look_for_certain_operator || c == certain_operator_to_look_for) &&
+                   (!exclude_certain_operator || c != certain_operator_to_exclude)) {
+            return i;
         }
     }
-
     return -1;
 }
 
-void remove_outside_brackets(string& statement)
-{
-    if (statement.size() == 0)
-    {
-        throw runtime_error("empty string statement for remove_outside_brackets()");
+bool is_statement_legal(const string& statement) {
+    bool unclosed_open_bracket = false;
+    int num_open_brackets = 0;
+    int num_closed_brackets = 0;
+
+    for (char c: statement) {
+        if (c == '(') {
+            ++num_open_brackets;
+            unclosed_open_bracket = true;
+        } else if (c == ')') {
+            ++num_closed_brackets;
+            if (!unclosed_open_bracket) {
+                return false;
+            } else if (num_closed_brackets >= num_open_brackets) {
+                unclosed_open_bracket = false; 
+                // Since it's been closed by its corresponding closed bracket.
+            }
+        }
     }
+    return (!unclosed_open_bracket && num_open_brackets == num_closed_brackets);
+}
 
-    if (get_main_operator_index(statement, false, ' ', false, ' ') == 0 && statement[0] == '!')
-    {
+void remove_outside_brackets(string& statement) {
+    if (statement.empty()) {
+        throw runtime_error("empty string statement for remove_outside_brackets()");
+    } else if (statement[0] == '!' && get_main_operator_index(statement, false, ' ', false, ' ') == 0) {
         statement = statement.substr(1, statement.size()-1);
-
         remove_outside_brackets(statement);
-
         // Now add the '!' back in:
-
-        if (statement.size() > 1)
-        {
+        if (statement.size() > 1) {
             statement = "(" + statement + ")"; // So that the negation applies to the whole statement.
         }
-
         statement = "!" + statement;
-    }
-
-    else
-    {
+    } else {
         string old_version = statement;
-
-        if (statement[0] == '(' && statement[statement.size()-1] == ')')
-        {
+        if (statement[0] == '(' && statement[statement.size()-1] == ')') {
             statement = statement.substr(1, statement.size() - 2);
-
-            // Now make sure statement is okay:
-
-            bool passed_open_bracket = false;
-
-            bool passed_closed_bracket = false;
-
-            int num_open_brackets = 0;
-
-            int num_closed_brackets = 0;
-
-            for (char c: statement)
-            {
-                if (c == '(')
-                {
-                    num_open_brackets++;
-
-                    passed_open_bracket = true;
-                }
-
-                if (c == ')')
-                {
-                    num_closed_brackets++;
-
-                    if (!passed_open_bracket)
-                    {
-                        statement = old_version;
-                        return;
-                    }
-
-                    else if (num_closed_brackets >= num_open_brackets)
-                    {
-                        passed_open_bracket = false; // Since it's been closed by its corresponding
-                                                     // closed bracket.
-                    }
-                }
-            }
-
-            if (passed_open_bracket || num_open_brackets != num_closed_brackets)
-            {
-                // Unclosed open bracket, or there aren't the same number of open and closed brackets:
-
+            // Now make sure statement is legal:
+            if (!is_statement_legal(statement)) {
                 statement = old_version;
-                return;
+            } else {
+                remove_outside_brackets(statement);
             }
-
-            remove_outside_brackets(statement);
         }
     }
 }
 
-string get_left_statement(const string& statement, char main_operator)
-{
+string get_left_statement(const string& statement, char main_operator) {
     int main_operator_index = get_main_operator_index(statement, true, main_operator, false, ' ');
-
     string left_statement = statement.substr(0, main_operator_index);
-
     remove_outside_brackets(left_statement);
-
     return left_statement;
 }
 
-string get_right_statement(const string& statement, char main_operator)
-{
+string get_right_statement(const string& statement, char main_operator) {
     int main_operator_index = get_main_operator_index(statement, true, main_operator, false, ' ');
-
-    string right_statement = statement.substr(main_operator_index + 1, (statement.size() - main_operator_index - 1));
-
+    string right_statement = statement.substr(main_operator_index + 1, 
+                                              (statement.size() - main_operator_index - 1));
     remove_outside_brackets(right_statement);
-
     return right_statement;
 }
 
-bool in_vector(const vector<string>& statements, const string& s)
-{
-    for (const string& current: statements)
-    {
-        if (s == current)
-        {
-            return true;
-        }
-    }
-
-    return false;
+bool in_vector(const vector<string>& statements, const string& s) {
+    return find(statements.begin(), statements.end(), s) != statements.end();
 }
 
-bool attempt_contradiction(vector<string> statements, string additional_statement)
-{
+bool attempt_contradiction(vector<string> statements, string additional_statement) {
     // CONTINUE HERE:
-
     // Function returns true if a contradiction can be made using the statements.
-
-    // Eee if anything the additional statement implies leads to a direct contradiction?
-
+    // See if anything the additional_statement implies leads to a direct contradiction?
     return false;
 }
 
 bool contains(const string& statement, const string& text)
 {
-    for (int i = 0; i <= statement.size() - text.size(); i++)
-    {
-        if (statement.substr(i, text.size()) == text)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return statement.find(text) != string::npos;
 }
 
 vector<string> get_statements_containing_statement(const vector<string>& statements,
-                                                   const string& statement)
-{
+                                                   const string& statement) {
     vector<string> selected_strings;
-
-    for (string current: statements)
-    {
-        if (contains(current, statement))
-        {
+    for (const string& current: statements) {
+        if (contains(current, statement)) {
             selected_strings.push_back(current);
         }
     }
-
     return selected_strings;
 }
 
-bool is_a_conditional(const string& statement)
-{
+bool is_a_conditional(const string& statement) {
     return (get_main_operator_index(statement, true, '>', false, ' ')) != -1;
-
-   //  return contains(statement, ">");
 }
 
-int index_of(const string& text, char c)
-{
-    for (int i = 0; i < text.size(); i++)
-    {
-        if (text[i] == c)
-        {
-            return i;
-        }
-    }
-
-    throw runtime_error("char does not exist in string");
+int index_of(const string& text, char c) {
+    int index = text.find(c);
+    assert(index != string::npos);
+    return index;
 }
 
+// TODO - Continue here for formatting the code and making it cleaner.
 string get_stuff_after_character(const string& text, int index_of_character, bool eliminate_brackets)
 {
    // int index_of_character = index_of(text, c);
@@ -971,14 +875,11 @@ bool attempt_proof(vector<string> statements, string conclusion, bool is_overall
 
         string negated_conclusion = negate_by_adding_exclamation(conclusion);
 
-        if (attempt_contradiction(statements, negated_conclusion))
-        {
+        /*if (attempt_contradiction(statements, negated_conclusion)) {
             message = "Proved " + conclusion + " via contradiction\n";
-
             steps_of_proof.push_back(message);
-
             return true; // proved the conclusion, since negating it implies a contradiction.
-        }
+        }*/
     }
 
     char main_operator = conclusion[main_operator_index_of_conclusion];
@@ -1664,37 +1565,20 @@ bool attempt_proof_call(const vector<string>& statements, const string& conclusi
     return try_to_solve;
 }
 
-int main()
-{
+int main() {
     srand(time(NULL));
     vector<string> statements;
     string conclusion = "";
 
     while (true) {
         get_user_inputs(statements, conclusion);
-
         if (statements.empty()) {
             break;
         }
-
         cout << "\n";
-
         bool solved = attempt_proof_call(statements, conclusion);
-
-        if (solved)
-        {
-            cout << "\nSolved the problem!\n";
-        }
-
-        else
-        {
-            cout << "Could not solve the problem.\n";
-        }
-
-        cout << "\n\n";
-
+        cout << (solved ? "\nSolved the problem!\n" : "Could not solve the problem.\n") << "\n\n";
         statements.clear();
-
         conclusion = "";
     }
 }
