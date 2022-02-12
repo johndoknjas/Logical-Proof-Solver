@@ -55,30 +55,26 @@ void remove_any_spaces(string& statement)
 
 void get_user_inputs(vector<string>& premises, string& conclusion)
 {
-    cout << "Enter -1 for the last statement to be the conclusion.\n\n";
+    cout << "Once you've entered some statement(s), enter \"done\" for the last statement you've entered to be the";
+    cout << " conclusion that gets proven.\n";
+    cout << "Or, if you'd like to quit the program, enter \"done\" right now, for statement #1.\n";
 
     string user_input = "";
-
-    for (int i = 1; user_input != "-1"; i++)
-    {
-        if (i > 1)
-        {
+    for (int i = 1; user_input != "done"; ++i) {
+        if (i > 1) {
             premises.push_back(user_input);
         }
-
         cout << "Enter statement #" << i << ": ";
-
         getline(cin, user_input);
     }
 
-    for (string& premise: premises)
-    {
-        remove_any_spaces(premise);
+    if (!premises.empty()) {
+        for (string& premise: premises) {
+            remove_any_spaces(premise);
+        }
+        conclusion = premises[premises.size()-1];
+        premises.pop_back();
     }
-
-    conclusion = premises[premises.size()-1];
-
-    premises.pop_back();
 }
 
 // Function returns -1 if there is no main operator.
@@ -1589,6 +1585,7 @@ bool do_previous_suppositions_succeed(const vector<string>& vec, int i, int num_
             }
         }
     }
+    throw runtime_error("Control reached the end of the do_previous_suppositions_succeed function.");
 }
 
 void print_steps_of_proof()
@@ -1670,14 +1667,15 @@ bool attempt_proof_call(const vector<string>& statements, const string& conclusi
 int main()
 {
     srand(time(NULL));
-
     vector<string> statements;
-
     string conclusion = "";
 
-    while (true)
-    {
+    while (true) {
         get_user_inputs(statements, conclusion);
+
+        if (statements.empty()) {
+            break;
+        }
 
         cout << "\n";
 
