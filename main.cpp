@@ -1576,7 +1576,7 @@ int main() {
 
     while (true) {
         get_user_inputs(statements, conclusion);
-        if (statements.empty()) {
+        if (statements.empty() && conclusion == "") {
             break;
         }
         cout << "\n";
