@@ -1,0 +1,1 @@
+CPPFLAGS = -std=c++17 -O2

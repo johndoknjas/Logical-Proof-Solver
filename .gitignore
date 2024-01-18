@@ -1,3 +1,7 @@
+*
+!/**/
+!*.*
+!Makefile
 *.zip
 *.exe
 *.out
