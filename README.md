@@ -1,6 +1,7 @@
 This engine can prove a conclusion, given premises, using some core rules of logic. Almost all of the time, it is able to solve any such problem that I'm able to solve. It's far quicker than me, but sometimes its methods of proving can be inefficient. For example, it can be too eager to try proofs by contradiction. E.g., in order to prove P, assume !P. Then prove P, showing !P leads to a contradiction. Therefore, P. However, this is usually only done when the engine is a bit stuck.
 
-To run the program, just do ./a.out or ./a.exe in the terminal (depending on your OS). You can also compile main.cpp yourself (with "g++ main.cpp -O2").
+To run the program, compile main by using the Makefile: `make main`. If you'd like to use the compiler directly,
+do: `g++ main.cpp -std=c++17 -O2`.
 
 The following symbols represent negation, conjunction, disjunction, implication, and biconditional respectively:  !, ^, v, >, =
 Note that the v is the letter v.
